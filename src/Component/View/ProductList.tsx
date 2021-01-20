@@ -11,12 +11,8 @@ type ProductListProps = {
 }
 
 const styles = {
-  root: {
-    maxWidth: 720,
-    display: 'flex',
-  },
   cardRoot: {
-    maxWidth: 720,
+    minWidth: 460,
     margin: 10,
   },
   media: {
@@ -44,7 +40,7 @@ class ProductList extends Component<ProductListProps, {}> {
   render() {
     const { classes } = this.props;
     return (
-      <Grid className={classes.root} container spacing={1} justify="center" alignItems="center">
+      <Grid container spacing={0} direction="column" justify="center" alignItems="center">
         {
           productItems.map((item: Product, index: number) => {
             return (
