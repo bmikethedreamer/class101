@@ -104,3 +104,8 @@ const coupons = [
     discountAmount: 10000,
   }
 ];
+
+export {
+  productItems,
+  coupons
+}
