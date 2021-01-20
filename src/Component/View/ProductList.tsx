@@ -11,8 +11,11 @@ type ProductListProps = {
 }
 
 const styles = {
+  root: {
+    maxWidth: 1920,
+  },
   cardRoot: {
-    minWidth: 460,
+    minWidth: 450,
     margin: 10,
   },
   media: {
@@ -40,11 +43,11 @@ class ProductList extends Component<ProductListProps, {}> {
   render() {
     const { classes } = this.props;
     return (
-      <Grid container spacing={0} direction="column" justify="center" alignItems="center">
+      <Grid className={classes.root} container spacing={0} direction="column" justify="center" alignItems="center">
         {
           productItems.map((item: Product, index: number) => {
             return (
-              <Grid item xs={12} key={index}>
+              <Grid item xs={12} sm={4} key={index}>
                 <Card className={classes.cardRoot}>
                   <CardMedia
                     className={classes.media}
