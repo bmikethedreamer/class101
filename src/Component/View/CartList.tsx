@@ -12,6 +12,7 @@ import {
   Button,
   Checkbox,
   TextField,
+  Hidden,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { numberWithCommas } from '../../Common/common';
@@ -118,6 +119,20 @@ class CartList extends Component<CartListProps, CartListState> {
     this.setState({ allSelected, productItems: copiedProductItems });
   }
 
+  getAllPrice = () => {
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    let allPrice: number = 0;
+    if (copiedProductItems && copiedProductItems.length > 0) {
+      for (let idx = 0; idx < copiedProductItems.length; idx++) {
+        const item = copiedProductItems[idx];
+        const amount = item?.amount ? item.amount : 0;
+        const price = item.price * amount;
+        allPrice = allPrice + price;
+      }
+    }
+    return allPrice;
+  }
+
   componentDidMount = () => {
     const cartList: string[] = getCartList();
     const productItems: Product[] = getCartProductList(cartList);
@@ -146,7 +161,9 @@ class CartList extends Component<CartListProps, CartListState> {
                   <TableCell align="center">할인쿠폰</TableCell>
                   <TableCell align="center">수량</TableCell>
                   <TableCell align="center">판매금액</TableCell>
-                  <TableCell align="center">삭제</TableCell>
+                  <Hidden smDown>
+                    <TableCell align="center">삭제</TableCell>
+                  </Hidden>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -156,7 +173,9 @@ class CartList extends Component<CartListProps, CartListState> {
                       <Checkbox checked={item.isSelected} onClick={() => this.clickCheckBox(index)}></Checkbox>
                     </TableCell>
                     <TableCell align="center">
-                      <img src={item.coverImage} alt='' width='160'></img>
+                      <Hidden smDown>
+                        <img src={item.coverImage} alt='' width='160'></img>
+                      </Hidden>
                       <div>{item.title}</div>
                     </TableCell>
                     <TableCell align="center">{item?.availableCoupon !== false && <div className={classes.saleCoupon}>쿠폰 적용 가능</div>}</TableCell>
@@ -169,7 +188,7 @@ class CartList extends Component<CartListProps, CartListState> {
                           shrink: true,
                         }}
                         onChange={(e) => {
-                          const amount:number = Number(e.target.value)
+                          const amount: number = Number(e.target.value)
                           if (amount < 1) {
                             alert('최소 1개의 수량은 포함되어야 합니다.');
                             return;
@@ -181,26 +200,60 @@ class CartList extends Component<CartListProps, CartListState> {
                       />
                     </TableCell>
                     <TableCell align="center">{numberWithCommas(item.price.toString())}</TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => this.deleteShoppingCart(item.id)}>
-                        삭제
+                    <Hidden smDown>
+                      <TableCell align="center">
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => this.deleteShoppingCart(item.id)}>
+                          삭제
                       </Button>
-                    </TableCell>
+                      </TableCell>
+                    </Hidden>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
           <Grid container direction="row" justify="flex-start" alignItems="center">
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <Checkbox checked={this.state.allSelected} onClick={() => this.clickAllCheckbox()}></Checkbox>전체 선택
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={9}>
               <Button variant="contained" color="secondary" onClick={() => this.selecedDeleteShoppingCart()}>선택 삭제</Button>
             </Grid>
+          </Grid>
+          <Typography className={classes.title} variant="body2" color="textSecondary">
+            결제 금액
+          </Typography>
+          <Grid container direction="row" justify="flex-start" alignItems="center">
+            <TableContainer component={Paper}>
+              <Table className={classes.table} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">제품금액</TableCell>
+                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">할인금액</TableCell>
+                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">주문합계</TableCell>
+                    <TableCell align="center"></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell align="center">{`${numberWithCommas(String(this.getAllPrice()))} 원`}</TableCell>
+                    <TableCell>
+                      {`-`}
+                    </TableCell>
+                    <TableCell>
+                    </TableCell>
+                    <TableCell>
+                      {`=`}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Grid>
         </Grid>
       </React.Fragment>
