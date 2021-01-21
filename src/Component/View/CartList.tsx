@@ -11,6 +11,7 @@ import {
   Typography,
   Button,
   Checkbox,
+  TextField,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { numberWithCommas } from '../../Common/common';
@@ -106,11 +107,11 @@ class CartList extends Component<CartListProps, CartListState> {
     const copiedProductItems: Product[] = [...this.state.productItems];
     // 전체 선택
     if (allSelected) {
-      for(let idx = 0; idx < copiedProductItems.length; idx++) {
+      for (let idx = 0; idx < copiedProductItems.length; idx++) {
         copiedProductItems[idx].isSelected = true;
       }
     } else {
-      for(let idx = 0; idx < copiedProductItems.length; idx++) {
+      for (let idx = 0; idx < copiedProductItems.length; idx++) {
         copiedProductItems[idx].isSelected = false;
       }
     }
@@ -122,6 +123,7 @@ class CartList extends Component<CartListProps, CartListState> {
     const productItems: Product[] = getCartProductList(cartList);
     for (let idx = 0; idx < productItems.length; idx++) {
       productItems[idx].isSelected = true;
+      productItems[idx].amount = 1;
     }
     this.setState({ cartList, productItems });
   }
@@ -158,7 +160,26 @@ class CartList extends Component<CartListProps, CartListState> {
                       <div>{item.title}</div>
                     </TableCell>
                     <TableCell align="center">{item?.availableCoupon !== false && <div className={classes.saleCoupon}>쿠폰 적용 가능</div>}</TableCell>
-                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">
+                      <TextField
+                        type="number"
+                        variant="outlined"
+                        value={item.amount}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        onChange={(e) => {
+                          const amount:number = Number(e.target.value)
+                          if (amount < 1) {
+                            alert('최소 1개의 수량은 포함되어야 합니다.');
+                            return;
+                          }
+                          const copiedProductItems: Product[] = [...this.state.productItems];
+                          copiedProductItems[index].amount = Number(e.target.value);
+                          this.setState({ productItems: copiedProductItems });
+                        }}
+                      />
+                    </TableCell>
                     <TableCell align="center">{numberWithCommas(item.price.toString())}</TableCell>
                     <TableCell align="center">
                       <Button
