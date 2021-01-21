@@ -124,10 +124,12 @@ class CartList extends Component<CartListProps, CartListState> {
     let allPrice: number = 0;
     if (copiedProductItems && copiedProductItems.length > 0) {
       for (let idx = 0; idx < copiedProductItems.length; idx++) {
-        const item = copiedProductItems[idx];
-        const amount = item?.amount ? item.amount : 0;
-        const price = item.price * amount;
-        allPrice = allPrice + price;
+        if (copiedProductItems[idx].isSelected) {
+          const item = copiedProductItems[idx];
+          const amount = item?.amount ? item.amount : 0;
+          const price = item.price * amount;
+          allPrice = allPrice + price;
+        }
       }
     }
     return allPrice;
