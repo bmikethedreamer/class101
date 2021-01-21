@@ -12,3 +12,8 @@ interface Coupon {
   title: string,
   discountRate: number,
 }
+
+interface resultData {
+  _productItems: Product[],
+  next: any,
+}
