@@ -36,7 +36,7 @@ class Header extends Component<HeaderProps, {}> {
         <AppBar position="fixed">
           <Toolbar className={classes.toolbar} variant="dense">
             <Typography className={classes.title} variant="h6" noWrap>
-              <a href='/'>CLASS 101</a>
+              <Link to='/products'>CLASS 101</Link>
             </Typography>
             <Link to='/cart'>
               <IconButton color="inherit">

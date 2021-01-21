@@ -10,7 +10,7 @@ ReactDOM.render(
   <Router>
     <Switch>
       <Route path='/cart' component={CardList} />
-      <Route path='/products' component={ProductList} />
+      <Route exact path='/products' component={ProductList} />
       <Redirect from='/' to='/products' />
     </Switch>
   </Router >
