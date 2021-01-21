@@ -101,6 +101,22 @@ class CartList extends Component<CartListProps, CartListState> {
     this.setState({ allSelected, productItems: copiedProductItems });
   }
 
+  clickAllCheckbox = () => {
+    const allSelected = !this.state.allSelected;
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    // 전체 선택
+    if (allSelected) {
+      for(let idx = 0; idx < copiedProductItems.length; idx++) {
+        copiedProductItems[idx].isSelected = true;
+      }
+    } else {
+      for(let idx = 0; idx < copiedProductItems.length; idx++) {
+        copiedProductItems[idx].isSelected = false;
+      }
+    }
+    this.setState({ allSelected, productItems: copiedProductItems });
+  }
+
   componentDidMount = () => {
     const cartList: string[] = getCartList();
     const productItems: Product[] = getCartProductList(cartList);
@@ -159,7 +175,7 @@ class CartList extends Component<CartListProps, CartListState> {
           </TableContainer>
           <Grid container direction="row" justify="flex-start" alignItems="center">
             <Grid item xs={2}>
-              <Checkbox checked={this.state.allSelected}></Checkbox>전체 선택
+              <Checkbox checked={this.state.allSelected} onClick={() => this.clickAllCheckbox()}></Checkbox>전체 선택
             </Grid>
             <Grid item xs={6}>
               <Button variant="contained" color="secondary" onClick={() => this.selecedDeleteShoppingCart()}>선택 삭제</Button>
