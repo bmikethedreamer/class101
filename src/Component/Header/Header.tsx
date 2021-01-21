@@ -3,11 +3,10 @@ import { withStyles } from '@material-ui/styles';
 import { AppBar, Toolbar, Typography, IconButton, Badge } from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
-
 type HeaderProps = {
   classes: any,
+  cartList: string[],
 }
-
 
 const styles = {
   grow: {
@@ -30,7 +29,7 @@ const styles = {
 
 class Header extends Component<HeaderProps, {}> {
   render() {
-    const { classes } = this.props;
+    const { classes, cartList } = this.props;
     return (
       <div className={classes.grow}>
         <AppBar position="fixed">
@@ -39,7 +38,7 @@ class Header extends Component<HeaderProps, {}> {
               <a href='/'>CLASS 101</a>
             </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={0} color="secondary">
+              <Badge badgeContent={cartList.length} color="secondary">
                 <ShoppingCartIcon />
               </Badge>
             </IconButton>

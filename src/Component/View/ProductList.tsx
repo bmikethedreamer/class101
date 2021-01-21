@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Grid, Card, CardMedia, CardContent, CardActions, Typography, IconButton, Button } from '@material-ui/core';
+import { Grid, Card, CardMedia, CardContent, CardActions, Typography, Button } from '@material-ui/core';
+import { ToggleButton } from '@material-ui/lab';
 import { numberWithCommas } from '../../Common/common';
 import { withStyles } from '@material-ui/styles';
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -13,6 +14,7 @@ type ProductListProps = {
 }
 
 type ProductListState = {
+  cartList: string[],
   productItems: Product[],
   start: number,
   page: number,
@@ -45,14 +47,15 @@ const styles = {
     '&& div': {
       marginLeft: 10,
       color: 'white',
-    }
-  }
+    },
+  },
 }
 
 class ProductList extends Component<ProductListProps, ProductListState> {
   constructor(props: any) {
     super(props);
     this.state = {
+      cartList: [],
       productItems: [],
       start: 1,
       page: 5,
@@ -63,8 +66,26 @@ class ProductList extends Component<ProductListProps, ProductListState> {
   moreGetData = (start: any) => {
     const resultData: resultData = getProductItems(start, this.state.page);
     const { _productItems, next } = resultData;
-    const productItems: Product[] = [...this.state.productItems, ..._productItems]
+    // 새로 들어온 값 장바구니값 초기화
+    _productItems.map(item => item.isAddCart = false);
+    const productItems: Product[] = [...this.state.productItems, ..._productItems];
     this.setState({ next, productItems });
+  }
+
+  addShoppingCart = (index: number) => {
+    const copiedProductItems = [...this.state.productItems];
+    copiedProductItems[index].isAddCart = true;
+    const copiedCardList = [...this.state.cartList];
+    copiedCardList.push(copiedProductItems[index].id);
+    this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
+  }
+
+  deleteShoppingCart = (index: number) => {
+    const copiedProductItems = [...this.state.productItems];
+    copiedProductItems[index].isAddCart = false;
+    const copiedCardList = [...this.state.cartList];
+    copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[index].id),1); 
+    this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }
 
   componentDidMount = () => {
@@ -83,7 +104,9 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     }
     return (
       <React.Fragment>
-        <Header />
+        <Header 
+          cartList={this.state.cartList}
+        />
         <Grid className={classes.root} container spacing={0} direction="column" justify="center" alignItems="center">
           {
             this.state.productItems.map((item: Product, index: number) => {
@@ -110,9 +133,21 @@ class ProductList extends Component<ProductListProps, ProductListState> {
                       </Grid>
                     </CardContent>
                     <CardActions disableSpacing>
-                      <IconButton aria-label="장바구니에 넣기">
+                      <ToggleButton
+                        value="check"
+                        selected={item.isAddCart}
+                        onChange={() => {
+                          if (!item.isAddCart) {
+                            // 카트에서 뺴기
+                            this.addShoppingCart(index);
+                          } else {
+                            // 카트에 넣기
+                            this.deleteShoppingCart(index);
+                          }
+                        }}
+                      >
                         <AddShoppingCartIcon />
-                      </IconButton>
+                      </ToggleButton>
                     </CardActions>
                   </Card>
                 </Grid>
