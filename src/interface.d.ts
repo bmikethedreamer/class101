@@ -5,7 +5,8 @@ interface Product {
   price: number;
   score: number;
   availableCoupon?: boolean;
-  isAddCart?: boolean
+  isAddCart?: boolean;
+  isSelected?: boolean;
 }
 
 interface Coupon {

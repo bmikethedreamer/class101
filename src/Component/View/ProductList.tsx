@@ -86,12 +86,13 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     const copiedProductItems = [...this.state.productItems];
     copiedProductItems[index].isAddCart = true;
     const copiedCardList = [...this.state.cartList];
+    copiedCardList.push(copiedProductItems[index].id);
     // 장바구니에 최대 3개만 담을 수 있다.
-    if (copiedCardList && copiedCardList.length > 2) {
-      alert('장바구니에 더 이상 상품을 담을 수 없습니다.');
+    if (copiedCardList && copiedCardList.length > 3) {
+      alert('장바구니에 최대 3개만 담을 수 있습니다.');
+      copiedProductItems[index].isAddCart = false;
       return;
     }
-    copiedCardList.push(copiedProductItems[index].id);
     addCartList(copiedProductItems[index].id);
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }

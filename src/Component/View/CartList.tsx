@@ -16,7 +16,7 @@ import { withStyles } from '@material-ui/styles';
 import { numberWithCommas } from '../../Common/common';
 import Header from '../Header/Header';
 
-import { getCartList, getCartProductList, addCartList, deleteCartList } from '../../VServer/VServer';
+import { getCartList, getCartProductList, deleteCartList } from '../../VServer/VServer';
 
 type CartListProps = {
   classes: any
@@ -26,6 +26,7 @@ type CartListState = {
   cartList: string[],
   productItems: Product[],
   couponList: Coupon[],
+  allSelected: boolean,
 }
 
 const styles = {
@@ -54,6 +55,7 @@ class CartList extends Component<CartListProps, CartListState> {
       cartList: [],
       productItems: [],
       couponList: [],
+      allSelected: true,
     }
   }
 
@@ -66,9 +68,45 @@ class CartList extends Component<CartListProps, CartListState> {
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }
 
+  selecedDeleteShoppingCart = () => {
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    const copiedCardList = [...this.state.cartList];
+    const productItems: Product[] = [];
+    for (let idx = 0; idx < copiedProductItems.length; idx++) {
+      if (copiedProductItems[idx].isSelected === true) {
+        copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[idx].id), 1);
+        deleteCartList(copiedProductItems[idx].id);
+      } else {
+        productItems.push(copiedProductItems[idx]);
+      }
+    }
+    this.setState({ productItems, cartList: copiedCardList });
+  }
+
+  clickCheckBox = (index: number) => {
+    // 선택한 값 체크 박스
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    if (copiedProductItems[index].isSelected) copiedProductItems[index].isSelected = false;
+    else copiedProductItems[index].isSelected = true;
+    // 전체 체크 박스 선택 확인
+    const productLength: number = copiedProductItems.length;
+    let sumSelectedCheckboxNumber: number = 0;
+    for (let idx = 0; idx < copiedProductItems.length; idx++) {
+      if (copiedProductItems[idx].isSelected === true) sumSelectedCheckboxNumber += 1;
+    }
+    let allSelected: boolean = true;
+    if (sumSelectedCheckboxNumber !== productLength) {
+      allSelected = false;
+    }
+    this.setState({ allSelected, productItems: copiedProductItems });
+  }
+
   componentDidMount = () => {
     const cartList: string[] = getCartList();
     const productItems: Product[] = getCartProductList(cartList);
+    for (let idx = 0; idx < productItems.length; idx++) {
+      productItems[idx].isSelected = true;
+    }
     this.setState({ cartList, productItems });
   }
 
@@ -97,7 +135,7 @@ class CartList extends Component<CartListProps, CartListState> {
                 {this.state.productItems.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell align="center">
-                      <Checkbox></Checkbox>
+                      <Checkbox checked={item.isSelected} onClick={() => this.clickCheckBox(index)}></Checkbox>
                     </TableCell>
                     <TableCell align="center">
                       <img src={item.coverImage} alt='' width='160'></img>
@@ -110,9 +148,7 @@ class CartList extends Component<CartListProps, CartListState> {
                       <Button
                         variant="contained"
                         color="secondary"
-                        onClick={() => {
-                          this.deleteShoppingCart(item.id);
-                        }}>
+                        onClick={() => this.deleteShoppingCart(item.id)}>
                         삭제
                       </Button>
                     </TableCell>
@@ -121,6 +157,14 @@ class CartList extends Component<CartListProps, CartListState> {
               </TableBody>
             </Table>
           </TableContainer>
+          <Grid container direction="row" justify="flex-start" alignItems="center">
+            <Grid item xs={2}>
+              <Checkbox checked={this.state.allSelected}></Checkbox>전체 선택
+            </Grid>
+            <Grid item xs={6}>
+              <Button variant="contained" color="secondary" onClick={() => this.selecedDeleteShoppingCart()}>선택 삭제</Button>
+            </Grid>
+          </Grid>
         </Grid>
       </React.Fragment>
     )
