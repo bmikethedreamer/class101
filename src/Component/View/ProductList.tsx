@@ -5,9 +5,9 @@ import { numberWithCommas } from '../../Common/common';
 import { withStyles } from '@material-ui/styles';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import Header from '../Header/Header'
+import Header from '../Header/Header';
 
-import { getProductItems } from '../../VServer/VServer';
+import { getProductItems, addCartList, deleteCartList, getCartList } from '../../VServer/VServer';
 
 type ProductListProps = {
   classes: any
@@ -23,6 +23,7 @@ type ProductListState = {
 
 const styles = {
   root: {
+    width: '100%',
     maxWidth: 1920,
     marginTop: 60,
   },
@@ -69,14 +70,29 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     // 새로 들어온 값 장바구니값 초기화
     _productItems.map(item => item.isAddCart = false);
     const productItems: Product[] = [...this.state.productItems, ..._productItems];
-    this.setState({ next, productItems });
+    // 만약 이전에 선택 했을 경우
+    const cartList: string[] = getCartList();
+    console.log("#cartList : ", cartList);
+    for (let i = 0; i < cartList.length; i++) {
+      for (let j = 0; j < productItems.length; j++) {
+        if (cartList[i] === productItems[j].id) productItems[j].isAddCart = true;
+      }
+    }
+    console.log("#productItems : ", productItems);
+    this.setState({ next, productItems, cartList });
   }
 
   addShoppingCart = (index: number) => {
     const copiedProductItems = [...this.state.productItems];
     copiedProductItems[index].isAddCart = true;
     const copiedCardList = [...this.state.cartList];
+    // 장바구니에 최대 3개만 담을 수 있다.
+    if (copiedCardList && copiedCardList.length > 2) {
+      alert('장바구니에 더 이상 상품을 담을 수 없습니다.');
+      return;
+    }
     copiedCardList.push(copiedProductItems[index].id);
+    addCartList(copiedProductItems[index].id);
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }
 
@@ -84,7 +100,8 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     const copiedProductItems = [...this.state.productItems];
     copiedProductItems[index].isAddCart = false;
     const copiedCardList = [...this.state.cartList];
-    copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[index].id),1); 
+    copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[index].id), 1);
+    deleteCartList(copiedProductItems[index].id);
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }
 
@@ -104,9 +121,7 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     }
     return (
       <React.Fragment>
-        <Header 
-          cartList={this.state.cartList}
-        />
+        <Header cartList={this.state.cartList} />
         <Grid className={classes.root} container spacing={0} direction="column" justify="center" alignItems="center">
           {
             this.state.productItems.map((item: Product, index: number) => {
@@ -137,13 +152,8 @@ class ProductList extends Component<ProductListProps, ProductListState> {
                         value="check"
                         selected={item.isAddCart}
                         onChange={() => {
-                          if (!item.isAddCart) {
-                            // 카트에서 뺴기
-                            this.addShoppingCart(index);
-                          } else {
-                            // 카트에 넣기
-                            this.deleteShoppingCart(index);
-                          }
+                          if (!item.isAddCart) /*카트에서 뺴기*/ this.addShoppingCart(index);
+                          else /*카트에 넣기*/ this.deleteShoppingCart(index);
                         }}
                       >
                         <AddShoppingCartIcon />

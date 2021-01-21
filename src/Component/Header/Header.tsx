@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/styles';
 import { AppBar, Toolbar, Typography, IconButton, Badge } from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 type HeaderProps = {
   classes: any,
-  cartList: string[],
+  cartList?: string[],
 }
 
 const styles = {
   grow: {
     flexGrow: 1,
-    '&& a' : {
+    '&& a': {
       textDecoration: 'none',
       color: '#ffffff',
     }
@@ -37,11 +38,13 @@ class Header extends Component<HeaderProps, {}> {
             <Typography className={classes.title} variant="h6" noWrap>
               <a href='/'>CLASS 101</a>
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={cartList.length} color="secondary">
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
+            <Link to='/cart'>
+              <IconButton color="inherit">
+                <Badge badgeContent={cartList ? cartList?.length : 0} color="secondary">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            </Link>
           </Toolbar>
         </AppBar>
       </div>
