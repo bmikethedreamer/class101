@@ -60,10 +60,15 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     }
   }
 
-  componentDidMount = () => {
-    const resultData: resultData = getProductItems(this.state.start, this.state.page);
+  moreGetData = (start: any) => {
+    const resultData: resultData = getProductItems(start, this.state.page);
     const { _productItems, next } = resultData;
-    this.setState({ next, productItems: _productItems });
+    const productItems: Product[] = [...this.state.productItems, ..._productItems]
+    this.setState({ next, productItems });
+  }
+
+  componentDidMount = () => {
+    this.moreGetData(this.state.start);
   }
 
   render() {
@@ -73,13 +78,7 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     const next = (this.state.next !== null) && this.state.next;
     if (next) {
       moreButton = (
-        <Button variant="contained" color="primary" onClick={() => {
-          const start = this.state.next;
-          const resultData: resultData = getProductItems(start, this.state.page);
-          const { _productItems, next } = resultData;
-          const productItems: Product[] = [...this.state.productItems, ..._productItems]
-          this.setState({ next, productItems });
-        }}>+ 결과 더보기</Button>
+        <Button variant="contained" color="primary" onClick={() => this.moreGetData(this.state.next)}>+ 결과 더보기</Button>
       )
     }
     return (
