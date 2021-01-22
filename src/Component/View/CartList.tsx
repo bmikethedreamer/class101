@@ -13,12 +13,14 @@ import {
   Checkbox,
   TextField,
   Hidden,
+  FormControl,
+  Select
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { numberWithCommas } from '../../Common/common';
 import Header from '../Header/Header';
 
-import { getCartList, getCartProductList, deleteCartList } from '../../VServer/VServer';
+import { getCartList, getCartProductList, deleteCartList, getCouponList } from '../../VServer/VServer';
 
 type CartListProps = {
   classes: any
@@ -29,6 +31,7 @@ type CartListState = {
   productItems: Product[],
   couponList: Coupon[],
   allSelected: boolean,
+  selectedCoupon: number,
 }
 
 const styles = {
@@ -38,6 +41,7 @@ const styles = {
   },
   title: {
     fontSize: 30,
+    marginLeft: 15,
   },
   tableTitle: {
     fontSize: 15,
@@ -48,6 +52,10 @@ const styles = {
     background: 'red',
     color: 'white',
   },
+  formControl: {
+    minWidth: 300,
+    margin: 15,
+  }
 }
 
 class CartList extends Component<CartListProps, CartListState> {
@@ -58,13 +66,14 @@ class CartList extends Component<CartListProps, CartListState> {
       productItems: [],
       couponList: [],
       allSelected: true,
+      selectedCoupon: 0,
     }
   }
 
   deleteShoppingCart = (id: string) => {
     let copiedProductItems: Product[] = [...this.state.productItems];
     copiedProductItems = copiedProductItems.filter(ProductItem => id !== ProductItem.id);
-    const copiedCardList = [...this.state.cartList];
+    const copiedCardList: string[] = [...this.state.cartList];
     copiedCardList.splice(copiedCardList.indexOf(id), 1);
     deleteCartList(id);
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
@@ -72,7 +81,7 @@ class CartList extends Component<CartListProps, CartListState> {
 
   selecedDeleteShoppingCart = () => {
     const copiedProductItems: Product[] = [...this.state.productItems];
-    const copiedCardList = [...this.state.cartList];
+    const copiedCardList: string[] = [...this.state.cartList];
     const productItems: Product[] = [];
     for (let idx = 0; idx < copiedProductItems.length; idx++) {
       if (copiedProductItems[idx].isSelected === true) {
@@ -125,14 +134,55 @@ class CartList extends Component<CartListProps, CartListState> {
     if (copiedProductItems && copiedProductItems.length > 0) {
       for (let idx = 0; idx < copiedProductItems.length; idx++) {
         if (copiedProductItems[idx].isSelected) {
-          const item = copiedProductItems[idx];
-          const amount = item?.amount ? item.amount : 0;
-          const price = item.price * amount;
+          const item: Product = copiedProductItems[idx];
+          const amount: number = item?.amount ? item.amount : 1;
+          const price: number = item.price * amount;
           allPrice = allPrice + price;
         }
       }
     }
     return allPrice;
+  }
+
+  selectCoupon = (e: any) => {
+    const selectedCoupon = e.target.value;
+    this.setState({ selectedCoupon });
+  }
+
+  getDiscountPrice = () => {
+    const selectedCoupon: number = Number(this.state.selectedCoupon);
+    let discountPrice: number = 0;
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    const copiedCouponList: Coupon[] = [...this.state.couponList];
+    const coupon: Coupon = copiedCouponList[selectedCoupon - 1];
+    let availablePrice: number = 0;
+    if (selectedCoupon !== 0) {
+      if (coupon.type === 'rate') {
+        const discountRate = coupon.discountRate ? coupon.discountRate : 0;
+        if (discountRate !== 0) {
+          for (let idx = 0; idx < copiedProductItems.length; idx++) {
+            const item: Product = copiedProductItems[idx];
+            if (item?.availableCoupon !== false && item.isSelected) {
+              const amount: number = item?.amount ? item.amount : 1
+              availablePrice = availablePrice + (item.price * amount);
+            }
+          }
+          discountPrice = availablePrice * (discountRate / 100);
+        }
+      } else if (coupon.type === 'amount') {
+        for (let idx = 0; idx < copiedProductItems.length; idx++) {
+          let dispriceProductCount: number = 0;
+          const item: Product = copiedProductItems[idx];
+          if (item?.availableCoupon !== false && item.isSelected) {
+            const amount: number = item?.amount ? item.amount : 1
+            dispriceProductCount = (dispriceProductCount + 1) * amount;
+          }
+          const discountAmount = coupon.discountAmount ? coupon.discountAmount : 0;
+          discountPrice = discountPrice + (discountAmount * (dispriceProductCount));
+        }
+      }
+    }
+    return discountPrice;
   }
 
   componentDidMount = () => {
@@ -142,7 +192,8 @@ class CartList extends Component<CartListProps, CartListState> {
       productItems[idx].isSelected = true;
       productItems[idx].amount = 1;
     }
-    this.setState({ cartList, productItems });
+    const couponList: Coupon[] = getCouponList();
+    this.setState({ cartList, productItems, couponList });
   }
 
   render() {
@@ -150,7 +201,7 @@ class CartList extends Component<CartListProps, CartListState> {
     return (
       <React.Fragment>
         <Header cartList={this.state.cartList} />
-        <Grid className={classes.root} container spacing={0} direction="column" justify="center" alignItems="center">
+        <Grid className={classes.root} container spacing={0} direction="column" justify="center">
           <Typography className={classes.title} variant="body2" color="textSecondary">
             장바구니
           </Typography>
@@ -180,7 +231,7 @@ class CartList extends Component<CartListProps, CartListState> {
                       </Hidden>
                       <div>{item.title}</div>
                     </TableCell>
-                    <TableCell align="center">{item?.availableCoupon !== false && <div className={classes.saleCoupon}>쿠폰 적용 가능</div>}</TableCell>
+                    <TableCell align="center">{item?.availableCoupon !== false && <div className={classes.saleCoupon}>적용 가능</div>}</TableCell>
                     <TableCell align="center">
                       <TextField
                         type="number"
@@ -226,6 +277,21 @@ class CartList extends Component<CartListProps, CartListState> {
             </Grid>
           </Grid>
           <Typography className={classes.title} variant="body2" color="textSecondary">
+            쿠폰
+          </Typography>
+          <Grid container direction="row" justify="flex-start" alignItems="center">
+            <Grid item xs={12}>
+              <FormControl variant="outlined" className={classes.formControl}>
+                <Select native value={this.state.selectedCoupon} onChange={(e) => this.selectCoupon(e)}>
+                  <option value={0}>쿠폰사용안함</option>
+                  {this.state.couponList.map((coupon: Coupon, index: number) => {
+                    return (<option value={index + 1}>{coupon.title}</option>)
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Typography className={classes.title} variant="body2" color="textSecondary">
             결제 금액
           </Typography>
           <Grid container direction="row" justify="flex-start" alignItems="center">
@@ -244,13 +310,12 @@ class CartList extends Component<CartListProps, CartListState> {
                 <TableBody>
                   <TableRow>
                     <TableCell align="center">{`${numberWithCommas(String(this.getAllPrice()))} 원`}</TableCell>
+                    <TableCell align="center">{`-`}</TableCell>
+                    <TableCell align="center">{`${numberWithCommas(String(this.getDiscountPrice()))} 원`}</TableCell>
+                    <TableCell align="center">{`=`}</TableCell>
+                    <TableCell align="center">{`${numberWithCommas(String(this.getAllPrice() - this.getDiscountPrice()))} 원`}</TableCell>
                     <TableCell>
-                      {`-`}
-                    </TableCell>
-                    <TableCell>
-                    </TableCell>
-                    <TableCell>
-                      {`=`}
+                      <Button variant="contained" color="secondary">주문하기</Button>
                     </TableCell>
                   </TableRow>
                 </TableBody>

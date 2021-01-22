@@ -72,20 +72,18 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     const productItems: Product[] = [...this.state.productItems, ..._productItems];
     // 만약 이전에 선택 했을 경우
     const cartList: string[] = getCartList();
-    console.log("#cartList : ", cartList);
     for (let i = 0; i < cartList.length; i++) {
       for (let j = 0; j < productItems.length; j++) {
         if (cartList[i] === productItems[j].id) productItems[j].isAddCart = true;
       }
     }
-    console.log("#productItems : ", productItems);
     this.setState({ next, productItems, cartList });
   }
 
   addShoppingCart = (index: number) => {
-    const copiedProductItems = [...this.state.productItems];
+    const copiedProductItems: Product[] = [...this.state.productItems];
     copiedProductItems[index].isAddCart = true;
-    const copiedCardList = [...this.state.cartList];
+    const copiedCardList: string[] = [...this.state.cartList];
     copiedCardList.push(copiedProductItems[index].id);
     // 장바구니에 최대 3개만 담을 수 있다.
     if (copiedCardList && copiedCardList.length > 3) {
@@ -98,9 +96,9 @@ class ProductList extends Component<ProductListProps, ProductListState> {
   }
 
   deleteShoppingCart = (index: number) => {
-    const copiedProductItems = [...this.state.productItems];
+    const copiedProductItems: Product[] = [...this.state.productItems];
     copiedProductItems[index].isAddCart = false;
-    const copiedCardList = [...this.state.cartList];
+    const copiedCardList: string[] = [...this.state.cartList];
     copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[index].id), 1);
     deleteCartList(copiedProductItems[index].id);
     this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
@@ -127,7 +125,7 @@ class ProductList extends Component<ProductListProps, ProductListState> {
           {
             this.state.productItems.map((item: Product, index: number) => {
               return (
-                <Grid item xs={12} sm={4} key={index}>
+                <Grid item xs={12} key={index}>
                   <Card className={classes.cardRoot}>
                     <CardMedia
                       className={classes.media}

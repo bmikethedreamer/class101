@@ -13,7 +13,8 @@ interface Product {
 interface Coupon {
   type: string;
   title: string;
-  discountRate: number;
+  discountRate?: number;
+  discountAmount?: number;
 }
 
 interface resultData {

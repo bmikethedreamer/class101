@@ -1,4 +1,5 @@
 import { productItems } from '../data/productItems';
+import { coupons }  from '../data/productItems';
 
 const cartList: string[] = [];
 
@@ -32,7 +33,6 @@ const getCartList = () => {
 
 const getCartProductList = (cartList: string[]) => {
   const _productItems: Product[] = [];
-  console.log("#getCartProductList : ", cartList);
   for (let i = 0; i < cartList.length; i++) {
     for (let j = 0; j < productItems.length; j++) {
       if (cartList[i] === productItems[j].id) _productItems.push(productItems[j]);
@@ -41,10 +41,15 @@ const getCartProductList = (cartList: string[]) => {
   return _productItems;
 }
 
+const getCouponList = () => {
+  return coupons;
+}
+
 export {
   getProductItems,
   addCartList,
   deleteCartList,
   getCartList,
   getCartProductList,
+  getCouponList,
 }
