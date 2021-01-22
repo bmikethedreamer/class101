@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import './index.css';
 import ProductList from './Component/View/ProductList';
+import CardList from './Component/View/CartList';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <Router>
     <Switch>
-      <Route path='/products' component={ProductList} />
+      <Route path='/cart' component={CardList} />
+      <Route exact path='/products' component={ProductList} />
       <Redirect from='/' to='/products' />
     </Switch>
   </Router >

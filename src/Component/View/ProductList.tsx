@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
-import { Grid, Card, CardMedia, CardContent, CardActions, Typography, IconButton, Button } from '@material-ui/core';
+import { Grid, Card, CardMedia, CardContent, CardActions, Typography, Button } from '@material-ui/core';
+import { ToggleButton } from '@material-ui/lab';
 import { numberWithCommas } from '../../Common/common';
 import { withStyles } from '@material-ui/styles';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import Header from '../Header/Header'
+import Header from '../Header/Header';
 
-import { getProductItems } from '../../VServer/VServer';
+import { getProductItems, addCartList, deleteCartList, getCartList } from '../../VServer/VServer';
 
 type ProductListProps = {
   classes: any
 }
 
 type ProductListState = {
+  cartList: string[],
   productItems: Product[],
   start: number,
   page: number,
@@ -21,6 +23,7 @@ type ProductListState = {
 
 const styles = {
   root: {
+    width: '100%',
     maxWidth: 1920,
     marginTop: 60,
   },
@@ -45,14 +48,15 @@ const styles = {
     '&& div': {
       marginLeft: 10,
       color: 'white',
-    }
-  }
+    },
+  },
 }
 
 class ProductList extends Component<ProductListProps, ProductListState> {
   constructor(props: any) {
     super(props);
     this.state = {
+      cartList: [],
       productItems: [],
       start: 1,
       page: 5,
@@ -63,8 +67,41 @@ class ProductList extends Component<ProductListProps, ProductListState> {
   moreGetData = (start: any) => {
     const resultData: resultData = getProductItems(start, this.state.page);
     const { _productItems, next } = resultData;
-    const productItems: Product[] = [...this.state.productItems, ..._productItems]
-    this.setState({ next, productItems });
+    // 새로 들어온 값 장바구니값 초기화
+    _productItems.map(item => item.isAddCart = false);
+    const productItems: Product[] = [...this.state.productItems, ..._productItems];
+    // 만약 이전에 선택 했을 경우
+    const cartList: string[] = getCartList();
+    for (let i = 0; i < cartList.length; i++) {
+      for (let j = 0; j < productItems.length; j++) {
+        if (cartList[i] === productItems[j].id) productItems[j].isAddCart = true;
+      }
+    }
+    this.setState({ next, productItems, cartList });
+  }
+
+  addShoppingCart = (index: number) => {
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    copiedProductItems[index].isAddCart = true;
+    const copiedCardList: string[] = [...this.state.cartList];
+    copiedCardList.push(copiedProductItems[index].id);
+    // 장바구니에 최대 3개만 담을 수 있다.
+    if (copiedCardList && copiedCardList.length > 3) {
+      alert('장바구니에 최대 3개만 담을 수 있습니다.');
+      copiedProductItems[index].isAddCart = false;
+      return;
+    }
+    addCartList(copiedProductItems[index].id);
+    this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
+  }
+
+  deleteShoppingCart = (index: number) => {
+    const copiedProductItems: Product[] = [...this.state.productItems];
+    copiedProductItems[index].isAddCart = false;
+    const copiedCardList: string[] = [...this.state.cartList];
+    copiedCardList.splice(copiedCardList.indexOf(copiedProductItems[index].id), 1);
+    deleteCartList(copiedProductItems[index].id);
+    this.setState({ productItems: copiedProductItems, cartList: copiedCardList });
   }
 
   componentDidMount = () => {
@@ -83,12 +120,12 @@ class ProductList extends Component<ProductListProps, ProductListState> {
     }
     return (
       <React.Fragment>
-        <Header />
+        <Header cartList={this.state.cartList} />
         <Grid className={classes.root} container spacing={0} direction="column" justify="center" alignItems="center">
           {
             this.state.productItems.map((item: Product, index: number) => {
               return (
-                <Grid item xs={12} sm={4} key={index}>
+                <Grid item xs={12} key={index}>
                   <Card className={classes.cardRoot}>
                     <CardMedia
                       className={classes.media}
@@ -110,9 +147,16 @@ class ProductList extends Component<ProductListProps, ProductListState> {
                       </Grid>
                     </CardContent>
                     <CardActions disableSpacing>
-                      <IconButton aria-label="장바구니에 넣기">
+                      <ToggleButton
+                        value="check"
+                        selected={item.isAddCart}
+                        onChange={() => {
+                          if (!item.isAddCart) /*카트에서 뺴기*/ this.addShoppingCart(index);
+                          else /*카트에 넣기*/ this.deleteShoppingCart(index);
+                        }}
+                      >
                         <AddShoppingCartIcon />
-                      </IconButton>
+                      </ToggleButton>
                     </CardActions>
                   </Card>
                 </Grid>
