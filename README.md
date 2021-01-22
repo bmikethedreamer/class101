@@ -1,46 +1,40 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 조건
 
-## Available Scripts
+- **React 혹은 React Native로 개발합니다**
+    - 그 외 다른 라이브러리는 자유롭게 사용 가능합니다
+- Git을 이용해 코드 버전 관리를 합니다
+- 로컬 환경에서 프로젝트를 실행할 수 있어야 합니다
+(예: npm run start 커맨드를 입력하여 [`localhost:3001`](http://localhost:3001) 에서 실행)
+- 장바구니를 구현하는 선에서 요구사항은 자유롭게 변경 가능합니다
+    - 생각하시기에 더 나은 기획이 있다면 그에 따라 구현하시고 이유를 `README.md`에 작성 해주세요
 
-In the project directory, you can run:
+## 요구사항
 
-### `yarn start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **상품 목록 페이지** (route: `/products`, RN의 경우 `ProductListScene`)를 구현합니다
+    - 각 상품은 가격과 사진, 상품 제목을 표시합니다
+    - 상품의 score를 기준으로 내림차순으로 정렬하여 5개씩 보여주는 페이지네이션을 구현합니다
+        - ReactNative의 경우 `FlatList`를 이용하고, 리스트 최하단에 `더 불러오기` 버튼을 만들어 페이지네이션을 구현합니다.
+    - 각 상품에는 장바구니 버튼이 있습니다
+        - 상품이 장바구니에 담겨 있지 않은 경우 - `담기` 버튼을 구현합니다
+        - 상품이 장바구니에 담겨 있는 경우 - `빼기` 버튼을 구현합니다
+- **장바구니 페이지** (route: `/cart`, RN의 경우 `CartScene`)
+    - 장바구니에는 최대 3개의 상품이 담길 수 있습니다
+    - 장바구니의 상품 중 결제에 포함할 상품을 체크박스 등의 UI로 선택할 수 있습니다
+    - 장바구니에 담긴 각 상품의 수량을 선택할 수 있습니다
+        - 단, 최소 1개의 수량이 지정되어야 합니다
+    - 장바구니에 담긴 전체 상품의 최종 결제 금액에 대하여 쿠폰을 적용할 수 있습니다
+        - 쿠폰(coupon)은 두 가지 type을 가지고 있습니다
+            1. 정액 할인(amount) - `{discountAmount}원` 만큼 할인합니다
+            2. 비율 할인(rate) - `{discountRate}%` 만큼 할인합니다
+        - 상품 중에는 쿠폰 사용이 불가능한 상품(`availableCoupon == false`)이 존재합니다
+            - 이 상품들은 쿠폰 할인 계산에서 제외합니다
+        - 예1: 장바구니에서 상품A(50,000원)와 상품B(70,000)원을 모두 체크하고 5,000원 할인 쿠폰을 적용할 경우
+        ⇒ `(50000 + 70000) - 5000 = 115,000원` 이 최종 결제 금액이 됩니다
+        - 예2: 장바구니에서 상품A(50,000원)와 상품B(70,000)원와 상품C(쿠폰 사용 불가, 100,000원) 중 상품 A와 상품 C만 체크하고 10% 할인 쿠폰을 적용할 경우
+        ⇒ 상품 A에만 할인이 적용되어 `(50000 * 0.9) + 100,000 = 145,000원` 이 최종 결제 금액이 됩니다
+    - 최종 결제 금액을 장바구니 페이지 하단에 보여주세요
+        - 소수점 가격이 생긴다면 버림 처리 합니다
+- 상품과 쿠폰 데이터는 하단에 주어진 데이터를 사용해주세요
+    - 상품과 쿠폰 데이터가 서버에서 주어진다고 생각하고 구현 해주세요
+    - 서버에서 주어진다고 가정하기 때문에, **해당 데이터의 raw 값을 직접 변경하는 것은 허용하지 않습니다**
